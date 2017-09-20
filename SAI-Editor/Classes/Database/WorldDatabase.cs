@@ -75,24 +75,6 @@ namespace SAI_Editor.Classes.Database
             return String.Empty;
         }
 
-        public async Task<string> GetObjectScriptName(int entryorguid, int source_type)
-        {
-            if (entryorguid < 0)
-                entryorguid = await GetObjectIdByGuidAndSourceType(entryorguid, source_type);
-
-            switch ((SourceTypes)source_type)
-            {
-                case SourceTypes.SourceTypeCreature:
-                    return await GetCreatureScriptNameById(entryorguid);
-                case SourceTypes.SourceTypeGameobject:
-                    return await GetGameobjectScriptNameById(entryorguid);
-                case SourceTypes.SourceTypeAreaTrigger:
-                    return await GetAreaTriggerScriptNameById(entryorguid);
-            }
-
-            return String.Empty;
-        }
-
         public async Task<string> GetCreatureAiNameById(int id)
         {
             DataTable dt = await ExecuteQuery("SELECT ainame FROM creature_template WHERE entry = '" + id + "'");

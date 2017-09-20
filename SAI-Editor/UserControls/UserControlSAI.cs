@@ -1088,31 +1088,18 @@ namespace SAI_Editor
             {
                 if (aiName != String.Empty)
                 {
-                    string strAlreadyHasAiName = String.Empty;
                     bool aiNameIsSmart = SAI_Editor_Manager.Instance.IsAiNameSmartAi(aiName);
 
-                    if (aiNameIsSmart)
+                    if (!aiNameIsSmart)
                     {
-                        if (smartScripts == null || smartScripts.Count == 0)
-                            goto SkipWorldDatabaseChecks;
+                        string strAlreadyHasAiName = String.Empty;
 
-                        if (fromNewLine)
-                            goto SkipAiNameAndScriptNameChecks;
-
-                        strAlreadyHasAiName += "This " + sourceTypeString + " already has its AIName set to '" + aiName + "'";
-                        strAlreadyHasAiName += "! Do you want to load it instead?";
-                    }
-                    else
-                    {
                         strAlreadyHasAiName += "This " + sourceTypeString + " already has its AIName set to '" + aiName + "'";
                         strAlreadyHasAiName += " and can therefore not have any SmartAI. Do you want to get rid of this AIName right now?";
-                    }
 
-                    DialogResult dialogResult = MessageBox.Show(strAlreadyHasAiName, "Something went wrong", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        DialogResult dialogResult = MessageBox.Show(strAlreadyHasAiName, "Something went wrong", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 
-                    if (dialogResult == DialogResult.Yes)
-                    {
-                        if (!aiNameIsSmart)
+                        if (dialogResult == DialogResult.Yes)
                         {
                             //! We don't have to target areatrigger_scripts here, as we've already done this a few lines up
                             string sqlOutput = "UPDATE `" + GetTemplateTableBySourceType((SourceTypes)source_type) + "` SET `AIName`=" + '"' + '"' + " WHERE `entry`=" + entryorguid + ";\n";
@@ -1120,23 +1107,11 @@ namespace SAI_Editor
                             using (SqlOutputForm sqlOutputForm = new SqlOutputForm(sqlOutput, false, saveToFile: false))
                                 sqlOutputForm.ShowDialog(this);
                         }
-                        else
-                            TryToLoadScript();
                     }
 
                     return;
                 }
-
-                string scriptName = await SAI_Editor_Manager.Instance.worldDatabase.GetObjectScriptName(entryorguid, source_type);
-
-                if (scriptName != String.Empty)
-                {
-                    MessageBox.Show("This " + sourceTypeString + " already has its ScriptName set (to '" + scriptName + "')!", "Something went wrong", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
             }
-
-        SkipAiNameAndScriptNameChecks:
 
             if (smartScripts != null && smartScripts.Count > 0)
             {
