@@ -286,19 +286,7 @@ namespace SAI_Editor.Properties {
                 this["UseWorldDatabase"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool InformedAboutSurvey {
-            get {
-                return ((bool)(this["InformedAboutSurvey"]));
-            }
-            set {
-                this["InformedAboutSurvey"] = value;
-            }
-        }
-        
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -308,18 +296,6 @@ namespace SAI_Editor.Properties {
             }
             set {
                 this["DuplicatePrimaryFields"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool AgreedToSurvey {
-            get {
-                return ((bool)(this["AgreedToSurvey"]));
-            }
-            set {
-                this["AgreedToSurvey"] = value;
             }
         }
         

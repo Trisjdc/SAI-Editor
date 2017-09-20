@@ -32,9 +32,7 @@ namespace SAI_Editor.Forms
         private int originalHeight = 0, originalWidth = 0, oldWidthTabControlWorkspaces = 0, oldHeightTabControlWorkspaces = 0;
         private int MainFormWidth = (int)SaiEditorSizes.MainFormWidth, MainFormHeight = (int)SaiEditorSizes.MainFormHeight;
         private List<SmartScript> lastDeletedSmartScripts = new List<SmartScript>(), smartScriptsOnClipBoard = new List<SmartScript>();
-        private Thread updateSurveyThread = null, checkIfUpdatesAvailableThread = null;
         private string applicationVersion = String.Empty;
-        private System.Windows.Forms.Timer timerCheckForInternetConnection = new System.Windows.Forms.Timer();
 
         public UserControlSAI userControl = null;
 
@@ -102,44 +100,6 @@ namespace SAI_Editor.Forms
 
             if (Settings.Default.HidePass)
                 textBoxPassword.PasswordChar = '●';
-
-            timerCheckForInternetConnection.Interval = 600000; //! 10 minutes
-            timerCheckForInternetConnection.Tick += timerCheckForInternetConnection_Tick;
-            timerCheckForInternetConnection.Enabled = false;
-
-            if (!Settings.Default.InformedAboutSurvey)
-            {
-                string termsArgeementString = "By clicking 'Yes' you agree to the application keeping a record of the usage in a remote database. Keep " +
-                                                "in mind that this data will not be disclosed to a third party.";
-
-                DialogResult result = MessageBox.Show(termsArgeementString, "Agree to the terms", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-
-                if (result != DialogResult.Yes)
-                {
-                    //! Not running this in a diff thread because we want this to complete before exiting.
-                    using (WebClient client = new WebClient())
-                    {
-                        try
-                        {
-                            client.DownloadData("http://www.jasper-rietrae.com/SAI-Editor/survey.php?agreed=false");
-                        }
-                        catch
-                        {
-
-                        }
-                    }
-                }
-
-                Settings.Default.InformedAboutSurvey = true;
-                Settings.Default.AgreedToSurvey = result == DialogResult.Yes;
-                Settings.Default.Save();
-            }
-
-            updateSurveyThread = new Thread(UpdateSurvey);
-            updateSurveyThread.Start();
-
-            checkIfUpdatesAvailableThread = new Thread(CheckIfUpdatesAvailable);
-            checkIfUpdatesAvailableThread.Start();
 
             try
             {
@@ -306,97 +266,6 @@ namespace SAI_Editor.Forms
             base.WndProc(ref m);
         }
 
-        private void UpdateSurvey()
-        {
-            using (WebClient client = new WebClient())
-            {
-                try
-                {
-                    string url = "http://www.jasper-rietrae.com/SAI-Editor/survey.php?";
-
-                    if (!Settings.Default.AgreedToSurvey)
-                        url += "agreed=false";
-                    else
-                        url += "version=" + applicationVersion.Replace('.', '-');
-
-                    client.DownloadData(url);
-                }
-                catch (ThreadAbortException)
-                {
-
-                }
-                catch (WebException)
-                {
-                    //! Try to connect to google.com. If it can't connect, it means no internet connection
-                    //! is available. We then start a timer which checks for an internet connection every
-                    //! 10 minutes.
-                    if (!SAI_Editor_Manager.Instance.HasInternetConnection())
-                        timerCheckForInternetConnection.Enabled = true;
-                }
-                catch (Exception ex)
-                {
-                    //! Run the messagebox on the mainthread
-                    Invoke(new Action(() =>
-                    {
-                        MessageBox.Show("Something went wrong while attempting to keep track of the use count. Please report the following message to developers:\n\n" + ex.ToString(), "Something went wrong!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }));
-                }
-            }
-        }
-
-        private void CheckIfUpdatesAvailable()
-        {
-            using (WebClient client = new WebClient())
-            {
-                try
-                {
-                    using (Stream streamVersion = client.OpenRead("http://dl.dropbox.com/u/84527004/SAI-Editor/version.txt"))
-                    {
-                        if (streamVersion != null)
-                        {
-                            using (StreamReader streamReaderVersion = new StreamReader(streamVersion))
-                            {
-                                string newAppVersionStr = streamReaderVersion.ReadToEnd();
-                                int newAppVersion = CustomConverter.ToInt32(newAppVersionStr.Replace("v", String.Empty).Replace(".", String.Empty));
-                                int currAppVersion = CustomConverter.ToInt32(applicationVersion.Replace("v", String.Empty).Replace(".", String.Empty));
-
-                                if (newAppVersion > 0 && currAppVersion > 0 && newAppVersion > currAppVersion)
-                                {
-                                    //! Run the messagebox in the mainthread
-                                    Invoke(new Action(() =>
-                                    {
-                                        DialogResult result = MessageBox.Show(this, "A new version of the application is available (" + newAppVersionStr + "). Do you wish to go to the download page?", "New version available!", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk);
-
-                                        if (result == DialogResult.Yes)
-                                            SAI_Editor_Manager.Instance.StartProcess("http://www.trinitycore.org/f/files/file/17-sai-editor/");
-                                    }));
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (ThreadAbortException)
-                {
-
-                }
-                catch (WebException)
-                {
-                    //! Try to connect to google.com. If it can't connect, it means no internet connection
-                    //! is available. We then start a timer which checks for an internet connection every
-                    //! 10 minutes.
-                    if (!SAI_Editor_Manager.Instance.HasInternetConnection())
-                        timerCheckForInternetConnection.Enabled = true;
-                }
-                catch (Exception ex)
-                {
-                    Invoke(new Action(() =>
-                    {
-                        MessageBox.Show("Something went wrong while checking for updates. Please report the following message to developers:\n\n" + ex.Message, "Something went wrong!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }));
-                }
-            }
-        }
-
         [DllImportAttribute("user32.dll")]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
@@ -405,18 +274,6 @@ namespace SAI_Editor.Forms
 
         [DllImportAttribute("user32.dll")]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
-
-        private void timerCheckForInternetConnection_Tick(object sender, EventArgs e)
-        {
-            //! Try to connect to google.com. If it can't connect, it means no internet connection
-            //! is available.
-            if (SAI_Editor_Manager.Instance.HasInternetConnection())
-            {
-                timerCheckForInternetConnection.Enabled = false;
-                checkIfUpdatesAvailableThread.Start();
-                updateSurveyThread.Start();
-            }
-        }
 
         private void timerExpandOrContract_Tick(object sender, EventArgs e)
         {
@@ -841,9 +698,6 @@ namespace SAI_Editor.Forms
                     Settings.Default.Save();
                 }
             }
-
-            if (updateSurveyThread != null)
-                updateSurveyThread.Abort();
         }
 
         private void SaveLastUsedFields()

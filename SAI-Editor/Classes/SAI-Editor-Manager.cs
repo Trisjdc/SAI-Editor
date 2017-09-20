@@ -458,39 +458,6 @@ namespace SAI_Editor.Classes
             return universalTime;
         }
 
-        public bool HasInternetConnectionWithCurrentNetwork()
-        {
-            return NetworkInterface.GetAllNetworkInterfaces().Any(x => x.OperationalStatus == OperationalStatus.Up);
-        }
-
-        public bool HasInternetConnection()
-        {
-            try
-            {
-                using (WebClient client = new WebClient())
-                    using (Stream stream = client.OpenRead("http://www.google.com"))
-                        return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public bool DoesUrlExist(string url)
-        {
-            try
-            {
-                WebRequest req = WebRequest.Create(url);
-                req.GetResponse();
-                return true;
-            }
-            catch (WebException)
-            {
-                return false;
-            }
-        }
-
         public bool StartProcess(string filename, string argument = "", bool showException = false)
         {
             bool isWebsiteUrl = filename.Contains("www.") || filename.Contains("http");
