@@ -1022,6 +1022,10 @@ namespace SAI_Editor.Classes
                     return "Closest Friendly Unit";
                 case SmartTarget.SMART_TARGET_LOOT_RECIPIENTS:
                     return "Loot Recipients";
+                case SmartTarget.SMART_TARGET_FARTHEST:
+                    return "Farthest On Threatlist";
+                case SmartTarget.SMART_TARGET_VEHICLE_ACCESSORY:
+                    return "Vehicle Passenger";
                 default:
                     return "<unsupported target type>";
             }
