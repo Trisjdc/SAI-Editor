@@ -282,50 +282,55 @@ namespace SAI_Editor.Classes
                         break;
                 }
 
+                // in case of SMART_EVENT_LINK, need to fill 'event' part of comment with link source
+                SmartScript smartScriptForEvent = smartScript;
                 if (fullLine.Contains("_previousLineComment_") && smartScriptLink != null)
+                {
                     fullLine = fullLine.Replace("_previousLineComment_", smartEventStrings[(SmartEvent)smartScriptLink.event_type]);
+                    smartScriptForEvent = smartScriptLink;
+                }
 
                 fullLine = fullLine.Replace("_previousLineComment_", "MISSING LINK");
 
                 //! This must be called AFTER we check for _previousLineComment_ so that copied event types don't need special handling
                 if (fullLine.Contains("_eventParamOne_"))
-                    fullLine = fullLine.Replace("_eventParamOne_", smartScript.event_param1.ToString());
+                    fullLine = fullLine.Replace("_eventParamOne_", smartScriptForEvent.event_param1.ToString());
 
                 if (fullLine.Contains("_eventParamTwo_"))
-                    fullLine = fullLine.Replace("_eventParamTwo_", smartScript.event_param2.ToString());
+                    fullLine = fullLine.Replace("_eventParamTwo_", smartScriptForEvent.event_param2.ToString());
 
                 if (fullLine.Contains("_eventParamThree_"))
-                    fullLine = fullLine.Replace("_eventParamThree_", smartScript.event_param3.ToString());
+                    fullLine = fullLine.Replace("_eventParamThree_", smartScriptForEvent.event_param3.ToString());
 
                 if (fullLine.Contains("_eventParamFour_"))
-                    fullLine = fullLine.Replace("_eventParamFour_", smartScript.event_param4.ToString());
+                    fullLine = fullLine.Replace("_eventParamFour_", smartScriptForEvent.event_param4.ToString());
 
                 if (fullLine.Contains("_spellNameEventParamOne_"))
                 {
-                    if (smartScript.event_param1 > 0)
-                        fullLine = fullLine.Replace("_spellNameEventParamOne_", await sqliteDatabase.GetSpellNameById(smartScript.event_param1));
+                    if (smartScriptForEvent.event_param1 > 0)
+                        fullLine = fullLine.Replace("_spellNameEventParamOne_", await sqliteDatabase.GetSpellNameById(smartScriptForEvent.event_param1));
                     else
                         fullLine = fullLine.Replace(" '_spellNameEventParamOne_'", String.Empty);
                 }
 
                 if (fullLine.Contains("_targetCastingSpellName_"))
                 {
-                    if (smartScript.event_param3.ToString() != "0")
-                        fullLine = fullLine.Replace("_targetCastingSpellName_", await sqliteDatabase.GetSpellNameById(smartScript.event_param3));
+                    if (smartScriptForEvent.event_param3.ToString() != "0")
+                        fullLine = fullLine.Replace("_targetCastingSpellName_", await sqliteDatabase.GetSpellNameById(smartScriptForEvent.event_param3));
                     else
                         fullLine = fullLine.Replace(" '_targetCastingSpellName_'", String.Empty);
                 }
 
                 if (fullLine.Contains("_questNameEventParamOne_"))
                 {
-                    if (smartScript.event_param1 == 0) //! Any quest (SMART_EVENT_ACCEPTED_QUEST / SMART_EVENT_REWARD_QUEST)
+                    if (smartScriptForEvent.event_param1 == 0) //! Any quest (SMART_EVENT_ACCEPTED_QUEST / SMART_EVENT_REWARD_QUEST)
                         fullLine = fullLine.Replace(" '_questNameEventParamOne_'", String.Empty);
                     else
-                        fullLine = fullLine.Replace("_questNameEventParamOne_", await worldDatabase.GetQuestTitleById(smartScript.event_param1));
+                        fullLine = fullLine.Replace("_questNameEventParamOne_", await worldDatabase.GetQuestTitleById(smartScriptForEvent.event_param1));
                 }
 
                 if (fullLine.Contains("_hasAuraEventParamOne_"))
-                    fullLine = fullLine.Replace("_hasAuraEventParamOne_", smartScript.event_param1 > 0 ? "Has Aura" : "Aura Not Present");
+                    fullLine = fullLine.Replace("_hasAuraEventParamOne_", smartScriptForEvent.event_param1 > 0 ? "Has Aura" : "Aura Not Present");
 
                 //! Action type
                 fullLine += " - " + smartActionStrings[(SmartAction)smartScript.action_type];
