@@ -131,7 +131,7 @@ namespace SAI_Editor
             checkBoxLockEventId.Checked = Settings.Default.LockSmartScriptId;
             checkBoxListActionlistsOrEntries.Checked = Settings.Default.ListActionLists;
             checkBoxAllowChangingEntryAndSourceType.Checked = Settings.Default.AllowChangingEntryAndSourceType;
-            checkBoxUsePhaseColors.Checked = false;// Settings.Default.PhaseHighlighting;
+            checkBoxUsePhaseColors.Checked = Settings.Default.PhaseHighlighting;
             checkBoxUseStaticTooltips.Checked = Settings.Default.ShowTooltipsStaticly;
 
             DefaultState.Save(this);
@@ -2131,7 +2131,7 @@ namespace SAI_Editor
                 await GenerateCommentForSmartScript(ListViewList.SelectedScript);
             }
 
-            customObjectListView.List.Apply(); //! Refreshes colors and whatnot
+            ListViewList.UpdatePhaseColors();
         }
 
         private async void textBoxEventChance_ValueChanged(object sender, EventArgs e)
@@ -2205,7 +2205,7 @@ namespace SAI_Editor
                     }
                 }
 
-                ListViewList.Apply(true);
+                ListViewList.UpdatePhaseColors();
             }
 
             previousLinkFrom = newLinkFrom;
@@ -3135,10 +3135,10 @@ namespace SAI_Editor
 
         public void checkBoxUsePhaseColors_CheckedChanged(object sender, EventArgs e)
         {
-            Settings.Default.PhaseHighlighting = false;// checkBoxUsePhaseColors.Checked;
+            Settings.Default.PhaseHighlighting = checkBoxUsePhaseColors.Checked;
             Settings.Default.Save();
 
-            ListViewList.Apply(true);
+            ListViewList.UpdatePhaseColors();
         }
 
         public void checkBoxUseStaticTooltips_CheckedChanged(object sender, EventArgs e)
@@ -3161,7 +3161,7 @@ namespace SAI_Editor
             checkBoxLockEventId.Checked = Settings.Default.LockSmartScriptId;
             checkBoxListActionlistsOrEntries.Checked = Settings.Default.ListActionLists;
             checkBoxAllowChangingEntryAndSourceType.Checked = Settings.Default.AllowChangingEntryAndSourceType;
-            checkBoxUsePhaseColors.Checked = false;// Settings.Default.PhaseHighlighting;
+            checkBoxUsePhaseColors.Checked = Settings.Default.PhaseHighlighting;
             checkBoxUseStaticTooltips.Checked = Settings.Default.ShowTooltipsStaticly;
 
             if (expanding)

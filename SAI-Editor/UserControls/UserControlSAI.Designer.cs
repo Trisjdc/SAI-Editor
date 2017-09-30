@@ -1493,7 +1493,6 @@
             // checkBoxUsePhaseColors
             // 
             this.checkBoxUsePhaseColors.AutoSize = true;
-            this.checkBoxUsePhaseColors.Enabled = false;
             this.checkBoxUsePhaseColors.Location = new System.Drawing.Point(13, 69);
             this.checkBoxUsePhaseColors.Name = "checkBoxUsePhaseColors";
             this.checkBoxUsePhaseColors.Size = new System.Drawing.Size(108, 17);

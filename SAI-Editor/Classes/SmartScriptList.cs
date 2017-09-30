@@ -51,6 +51,31 @@ namespace SAI_Editor.Classes
             return (((SmartScript)script).entryorguid).ToString();
         }
 
+        public void UpdatePhaseColors()
+        {
+            if (Scripts == null)
+                return;
+            
+            _colors = new Stack<Color>(Constants.phaseColors);
+            _phaseColors.Clear();
+
+            if (!Settings.Default.PhaseHighlighting)
+                return;
+
+            int[] phaseMasks = Scripts.Select(p => ((SmartScript)p).event_phase_mask).Distinct().ToArray();
+
+            if (phaseMasks.Length > Constants.phaseColors.Count)
+            {
+                MessageBox.Show("There are not enough colors in the application because you are using too many different phasemasks.", "Not enough colors!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            foreach (int phasemask in phaseMasks.Where(phasemask => phasemask != 0 && !_phaseColors.ContainsKey(phasemask)))
+                _phaseColors.Add(phasemask, _colors.Pop());
+
+            _oListView.Refresh();
+        }
+
         public override void Apply(bool keepSelection = false)
         {
             int lastSelectedIndex = _oListView.SelectedIndices.Count > 0 ? _oListView.SelectedIndices[0] : -1;
@@ -59,22 +84,8 @@ namespace SAI_Editor.Classes
             _colors = new Stack<Color>(Constants.phaseColors);
             _phaseColors.Clear();
 
-            if (Scripts != null)
-            {
-                int[] phasemasks = Scripts.Select(p => ((SmartScript)p).event_phase_mask).Distinct().ToArray();
-
-                if (phasemasks.Length > Constants.phaseColors.Count)
-                {
-                    MessageBox.Show("There are not enough colors in the application because you are using too many different phasemasks.", "Not enough colors!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                foreach (int phasemask in phasemasks.Where(phasemask => phasemask != 0 && !_phaseColors.ContainsKey(phasemask)))
-                    _phaseColors.Add(phasemask, _colors.Pop());
-
-                _oListView.Refresh();
-                ResizeColumns();
-            }
+            UpdatePhaseColors();
+            ResizeColumns();
         }
 
         public override object Clone()
